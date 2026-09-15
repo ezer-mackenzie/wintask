@@ -1,0 +1,25 @@
+# Normalize text files to LF in the repository while allowing Git to detect
+# the working-tree convention on each platform.
+*               text=auto
+
+# Source and configuration files.
+*.py            text diff=python
+*.pyi           text diff=python
+*.rs            text diff=rust
+*.toml          text diff=toml
+*.md            text
+*.ps1           text
+*.yml           text
+*.yaml          text
+*.xml           text
+Cargo.lock      text
+uv.lock         text
+
+# Common generated or binary artifacts.
+*.dll           binary
+*.pdb           binary
+*.whl           binary
+*.png           binary
+*.jpg           binary
+*.jpeg          binary
+*.gif           binary
