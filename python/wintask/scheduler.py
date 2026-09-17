@@ -20,6 +20,8 @@ class TaskScheduler:
         wake_to_run: bool = False,
         interval: int = 1,
         arguments: Sequence[str] = (),
+        working_directory: str | Path | None = None,
+        enabled: bool = True,
     ) -> None:
         """Register or update a task that runs a Python script daily."""
         trigger = DailyTrigger(at, interval=interval)
@@ -28,6 +30,8 @@ class TaskScheduler:
             trigger,
             wake_to_run=wake_to_run,
             arguments=arguments,
+            working_directory=working_directory,
+            enabled=enabled,
         )
         _wintask_backend.register_xml(name, xml)
 
@@ -47,6 +51,8 @@ class TaskScheduler:
         days: tuple[Weekday, ...],
         wake_to_run: bool = False,
         arguments: Sequence[str] = (),
+        working_directory: str | Path | None = None,
+        enabled: bool = True,
     ) -> None:
         """Register or update a task that runs on selected weekdays."""
         trigger = WeeklyTrigger(at, days=days)
@@ -55,6 +61,8 @@ class TaskScheduler:
             trigger,
             wake_to_run=wake_to_run,
             arguments=arguments,
+            working_directory=working_directory,
+            enabled=enabled,
         )
         _wintask_backend.register_xml(name, xml)
 
@@ -67,6 +75,8 @@ class TaskScheduler:
         months: tuple[Month, ...],
         wake_to_run: bool = False,
         arguments: Sequence[str] = (),
+        working_directory: str | Path | None = None,
+        enabled: bool = True,
     ) -> None:
         """Register or update a task that runs on selected month days."""
         trigger = MonthlyTrigger(at, day=day, months=months)
@@ -75,5 +85,7 @@ class TaskScheduler:
             trigger,
             wake_to_run=wake_to_run,
             arguments=arguments,
+            working_directory=working_directory,
+            enabled=enabled,
         )
         _wintask_backend.register_xml(name, xml)

@@ -52,6 +52,48 @@ class BuilderTests(unittest.TestCase):
             self.assertIn('"hello world"', arguments.text or "")
             self.assertIn("--count", arguments.text or "")
 
+    def test_working_directory_and_enabled_state_are_serialized(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            root = Path(temporary_directory)
+            script = root / "job.py"
+            working_directory = root / "work"
+            script.write_text("print('ok')", encoding="utf-8")
+            working_directory.mkdir()
+
+            xml = build_daily_xml(
+                script,
+                DailyTrigger(time(9, 30)),
+                working_directory=working_directory,
+                enabled=False,
+            )
+            parsed = ElementTree.fromstring(xml)
+            settings = parsed.find(f"{{{NAMESPACE}}}Settings")
+            working = parsed.find(
+                f"{{{NAMESPACE}}}Actions/{{{NAMESPACE}}}Exec/{{{NAMESPACE}}}WorkingDirectory"
+            )
+
+            self.assertIsNotNone(settings)
+            self.assertIsNotNone(working)
+            assert settings is not None
+            assert working is not None
+            enabled = settings.find(f"{{{NAMESPACE}}}Enabled")
+            self.assertIsNotNone(enabled)
+            assert enabled is not None
+            self.assertEqual(enabled.text, "false")
+            self.assertEqual(working.text, str(working_directory.resolve()))
+
+    def test_missing_working_directory_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            script = Path(temporary_directory) / "job.py"
+            script.write_text("print('ok')", encoding="utf-8")
+
+            with self.assertRaises(NotADirectoryError):
+                build_daily_xml(
+                    script,
+                    DailyTrigger(time(9, 30)),
+                    working_directory=script / "missing",
+                )
+
     def test_missing_script_is_rejected(self) -> None:
         with self.assertRaises(FileNotFoundError):
             build_daily_xml(

@@ -4,6 +4,14 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-09-17
+
+### Added
+
+- Added `working_directory` support for daily, weekly, and monthly tasks.
+- Added an `enabled` option to register tasks in an enabled or disabled state.
+- Added validation that the configured working directory exists.
+
 ## [0.4.0] - 2026-09-17
 
 ### Added

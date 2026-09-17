@@ -106,6 +106,8 @@ scheduler.create_daily(
     wake_to_run=True,
 	interval=1,
 	arguments=("--environment", "production"),
+	working_directory="C:/Users/example/project",
+	enabled=True,
 )
 
 scheduler.run("Example Python Job")
@@ -173,6 +175,9 @@ xml = build_daily_xml(
 	arguments=())` registers or updates a monthly task.
 - `arguments`: command-line arguments passed to the Python script. Values are
 	quoted using Windows command-line rules.
+- `working_directory`: existing directory used as the task process working
+	directory. Defaults to the script's parent directory.
+- `enabled`: whether the task is enabled when registered. Defaults to `True`.
 - `run(name)` starts an existing registered task.
 - `delete(name)` removes an existing registered task.
 
@@ -254,7 +259,7 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.4.0` adds command-line arguments for every supported trigger while
-preserving the daily, weekly, and monthly scheduling lifecycle. Richer
-settings, task folders, principals, and automated Windows integration tests
-remain future work.
+Version `0.5.0` adds configurable working directories and enabled state for
+every supported trigger while preserving the daily, weekly, and monthly
+scheduling lifecycle. Richer settings, task folders, principals, and automated
+Windows integration tests remain future work.
