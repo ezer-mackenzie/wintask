@@ -58,7 +58,7 @@ class WeeklyTrigger:
             raise ValueError("days must contain at least one weekday")
         if len(set(self.days)) != len(self.days):
             raise ValueError("days must not contain duplicates")
-        if any(not isinstance(day, Weekday) for day in self.days):
+        if any(type(day) is not Weekday for day in self.days):
             raise TypeError("days must contain Weekday values")
         if self.at.tzinfo is not None:
             raise ValueError("at must be a naive local time")
@@ -79,7 +79,7 @@ class MonthlyTrigger:
             raise ValueError("months must contain at least one month")
         if len(set(self.months)) != len(self.months):
             raise ValueError("months must not contain duplicates")
-        if any(not isinstance(month, Month) for month in self.months):
+        if any(type(month) is not Month for month in self.months):
             raise TypeError("months must contain Month values")
         if self.at.tzinfo is not None:
             raise ValueError("at must be a naive local time")

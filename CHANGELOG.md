@@ -4,6 +4,15 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-09-17
+
+### Added
+
+- Added an `arguments` parameter to daily, weekly, and monthly scheduling
+	methods.
+- Added Windows-compatible quoting for script paths and command-line
+	arguments in generated Task Scheduler XML.
+
 ## [0.3.0] - 2026-09-17
 
 ### Added

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from datetime import time
 from pathlib import Path
 
@@ -18,10 +19,16 @@ class TaskScheduler:
         at: time,
         wake_to_run: bool = False,
         interval: int = 1,
+        arguments: Sequence[str] = (),
     ) -> None:
         """Register or update a task that runs a Python script daily."""
         trigger = DailyTrigger(at, interval=interval)
-        xml = build_daily_xml(script_path, trigger, wake_to_run=wake_to_run)
+        xml = build_daily_xml(
+            script_path,
+            trigger,
+            wake_to_run=wake_to_run,
+            arguments=arguments,
+        )
         _wintask_backend.register_xml(name, xml)
 
     def delete(self, name: str) -> None:
@@ -39,10 +46,16 @@ class TaskScheduler:
         at: time,
         days: tuple[Weekday, ...],
         wake_to_run: bool = False,
+        arguments: Sequence[str] = (),
     ) -> None:
         """Register or update a task that runs on selected weekdays."""
         trigger = WeeklyTrigger(at, days=days)
-        xml = build_weekly_xml(script_path, trigger, wake_to_run=wake_to_run)
+        xml = build_weekly_xml(
+            script_path,
+            trigger,
+            wake_to_run=wake_to_run,
+            arguments=arguments,
+        )
         _wintask_backend.register_xml(name, xml)
 
     def create_monthly(
@@ -53,8 +66,14 @@ class TaskScheduler:
         day: int,
         months: tuple[Month, ...],
         wake_to_run: bool = False,
+        arguments: Sequence[str] = (),
     ) -> None:
         """Register or update a task that runs on selected month days."""
         trigger = MonthlyTrigger(at, day=day, months=months)
-        xml = build_monthly_xml(script_path, trigger, wake_to_run=wake_to_run)
+        xml = build_monthly_xml(
+            script_path,
+            trigger,
+            wake_to_run=wake_to_run,
+            arguments=arguments,
+        )
         _wintask_backend.register_xml(name, xml)

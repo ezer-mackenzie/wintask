@@ -32,6 +32,26 @@ class BuilderTests(unittest.TestCase):
             assert days_interval is not None
             self.assertEqual(days_interval.text, "3")
 
+    def test_script_arguments_are_quoted_in_xml(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            script = Path(temporary_directory) / "job.py"
+            script.write_text("print('ok')", encoding="utf-8")
+
+            xml = build_daily_xml(
+                script,
+                DailyTrigger(time(9, 30)),
+                arguments=("hello world", "--count", "2"),
+            )
+            root = ElementTree.fromstring(xml)
+            arguments = root.find(
+                f"{{{NAMESPACE}}}Actions/{{{NAMESPACE}}}Exec/{{{NAMESPACE}}}Arguments"
+            )
+
+            self.assertIsNotNone(arguments)
+            assert arguments is not None
+            self.assertIn('"hello world"', arguments.text or "")
+            self.assertIn("--count", arguments.text or "")
+
     def test_missing_script_is_rejected(self) -> None:
         with self.assertRaises(FileNotFoundError):
             build_daily_xml(

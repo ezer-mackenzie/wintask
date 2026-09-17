@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import sys
+from collections.abc import Sequence
 from datetime import datetime, timezone
 from pathlib import Path
+from subprocess import list2cmdline
 from xml.etree.ElementTree import Element, SubElement, tostring
 
 from .triggers import DailyTrigger, MonthlyTrigger, WeeklyTrigger
@@ -15,13 +17,14 @@ def build_daily_xml(
     trigger: DailyTrigger,
     *,
     wake_to_run: bool = False,
+    arguments: Sequence[str] = (),
 ) -> str:
     """Serialize a daily Python script task to Task Scheduler XML."""
     script = Path(script_path).expanduser().resolve()
     if not script.is_file():
         raise FileNotFoundError(script)
 
-    task = _build_task(script, wake_to_run=wake_to_run)
+    task = _build_task(script, wake_to_run=wake_to_run, arguments=arguments)
     triggers = task.find("Triggers")
     if triggers is None:
         raise RuntimeError("task XML is missing its trigger container")
@@ -41,13 +44,14 @@ def build_weekly_xml(
     trigger: WeeklyTrigger,
     *,
     wake_to_run: bool = False,
+    arguments: Sequence[str] = (),
 ) -> str:
     """Serialize a weekly Python script task to Task Scheduler XML."""
     script = Path(script_path).expanduser().resolve()
     if not script.is_file():
         raise FileNotFoundError(script)
 
-    task = _build_task(script, wake_to_run=wake_to_run)
+    task = _build_task(script, wake_to_run=wake_to_run, arguments=arguments)
     daily = task.find("Triggers")
     if daily is None:
         raise RuntimeError("task XML is missing its trigger container")
@@ -70,13 +74,14 @@ def build_monthly_xml(
     trigger: MonthlyTrigger,
     *,
     wake_to_run: bool = False,
+    arguments: Sequence[str] = (),
 ) -> str:
     """Serialize a monthly Python script task to Task Scheduler XML."""
     script = Path(script_path).expanduser().resolve()
     if not script.is_file():
         raise FileNotFoundError(script)
 
-    task = _build_task(script, wake_to_run=wake_to_run)
+    task = _build_task(script, wake_to_run=wake_to_run, arguments=arguments)
     triggers = task.find("Triggers")
     if triggers is None:
         raise RuntimeError("task XML is missing its trigger container")
@@ -95,7 +100,12 @@ def build_monthly_xml(
     return tostring(task, encoding="unicode", xml_declaration=True)
 
 
-def _build_task(script: Path, *, wake_to_run: bool = False) -> Element:
+def _build_task(
+    script: Path,
+    *,
+    wake_to_run: bool = False,
+    arguments: Sequence[str] = (),
+) -> Element:
     task = Element("Task", {"xmlns": NAMESPACE, "version": "1.4"})
     SubElement(task, "RegistrationInfo")
     settings = SubElement(task, "Settings")
@@ -108,6 +118,7 @@ def _build_task(script: Path, *, wake_to_run: bool = False) -> Element:
     actions = SubElement(task, "Actions", {"Context": "Author"})
     exec_action = SubElement(actions, "Exec")
     SubElement(exec_action, "Command").text = sys.executable
-    SubElement(exec_action, "Arguments").text = f'"{script}"'
+    command_arguments = list2cmdline([str(script), *arguments])
+    SubElement(exec_action, "Arguments").text = command_arguments
     SubElement(exec_action, "WorkingDirectory").text = str(script.parent)
     return task

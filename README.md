@@ -105,6 +105,7 @@ scheduler.create_daily(
     at=time(9, 30),
     wake_to_run=True,
 	interval=1,
+	arguments=("--environment", "production"),
 )
 
 scheduler.run("Example Python Job")
@@ -164,8 +165,14 @@ xml = build_daily_xml(
 
 ### `TaskScheduler`
 
-- `create_daily(name, script_path, at, wake_to_run=False, interval=1)` registers or
-  updates a daily task.
+- `create_daily(name, script_path, at, wake_to_run=False, interval=1,
+	arguments=())` registers or updates a daily task.
+- `create_weekly(name, script_path, at, days, wake_to_run=False,
+	arguments=())` registers or updates a weekly task.
+- `create_monthly(name, script_path, at, day, months, wake_to_run=False,
+	arguments=())` registers or updates a monthly task.
+- `arguments`: command-line arguments passed to the Python script. Values are
+	quoted using Windows command-line rules.
 - `run(name)` starts an existing registered task.
 - `delete(name)` removes an existing registered task.
 
@@ -247,7 +254,7 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.3.0` adds monthly triggers while preserving daily and weekly
-scheduling and the register/run/delete lifecycle. Richer settings, task
-folders, principals, and automated Windows integration tests remain future
-work.
+Version `0.4.0` adds command-line arguments for every supported trigger while
+preserving the daily, weekly, and monthly scheduling lifecycle. Richer
+settings, task folders, principals, and automated Windows integration tests
+remain future work.
