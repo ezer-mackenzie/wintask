@@ -14,6 +14,11 @@ on:
       - '*'
   pull_request:
   workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release tag to build and publish, for example v0.5.0"
+        required: true
+        type: string
 
 permissions:
   contents: read
@@ -38,6 +43,8 @@ jobs:
             target: ppc64le
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -69,6 +76,8 @@ jobs:
             target: armv7
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -101,6 +110,8 @@ jobs:
             python_arch: arm64
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -128,6 +139,8 @@ jobs:
             target: aarch64
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -147,6 +160,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
+        with:
+          ref: ${{ inputs.release_tag || github.ref }}
       - name: Build sdist
         uses: PyO3/maturin-action@v1
         with:
@@ -164,23 +179,14 @@ jobs:
     if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
     needs: [linux, musllinux, windows, macos, sdist]
     permissions:
-      # Use to sign the release artifacts
-      id-token: write
-      # Used to upload release artifacts
-      contents: write
-      # Used to generate artifact attestation
-      attestations: write
+      contents: read
     steps:
       - uses: actions/download-artifact@v7
-      - name: Generate artifact attestation
-        uses: actions/attest@v4
-        with:
-          subject-path: 'wheels-*/*'
       - name: Install uv
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
         uses: astral-sh/setup-uv@v7
       - name: Publish to PyPI
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
+        if: ${{ startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' }}
         run: uv publish 'wheels-*/*'
         env:
           UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
