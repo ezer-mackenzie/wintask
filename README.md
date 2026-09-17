@@ -126,6 +126,22 @@ TaskScheduler().create_weekly(
 )
 ```
 
+Monthly schedules are supported with an explicit day of the month:
+
+```python
+from datetime import time
+
+from wintask import Month, TaskScheduler
+
+TaskScheduler().create_monthly(
+	name="Monthly Python Job",
+	script_path="C:/Users/example/project/job.py",
+	at=time(9, 30),
+	day=15,
+	months=(Month.JANUARY, Month.JUNE),
+)
+```
+
 `script_path` must point to an existing file. The time is a naive local
 `datetime.time`; timezone-aware times are rejected because Windows Task
 Scheduler interprets the generated boundary in the local machine context.
@@ -166,6 +182,16 @@ xml = build_daily_xml(
 ### `Weekday`
 
 Provides the `MONDAY` through `SUNDAY` values used by weekly triggers.
+
+### `MonthlyTrigger`
+
+- `at`: local time at which the task starts.
+- `day`: day of the month from `1` through `31`.
+- `months`: one or more `Month` values.
+
+### `Month`
+
+Provides the `JANUARY` through `DECEMBER` values used by monthly triggers.
 
 ### `build_daily_xml`
 
@@ -221,6 +247,7 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.2.0` adds weekly triggers while preserving the daily scheduling and
-register/run/delete lifecycle. Richer settings, task folders, principals, and
-automated Windows integration tests remain future work.
+Version `0.3.0` adds monthly triggers while preserving daily and weekly
+scheduling and the register/run/delete lifecycle. Richer settings, task
+folders, principals, and automated Windows integration tests remain future
+work.

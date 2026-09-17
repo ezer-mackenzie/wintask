@@ -5,7 +5,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from xml.etree.ElementTree import Element, SubElement, tostring
 
-from .triggers import DailyTrigger, WeeklyTrigger
+from .triggers import DailyTrigger, MonthlyTrigger, WeeklyTrigger
 
 NAMESPACE = "http://schemas.microsoft.com/windows/2004/02/mit/task"
 
@@ -61,6 +61,36 @@ def build_weekly_xml(
     weekdays = SubElement(schedule, "DaysOfWeek")
     for day in trigger.days:
         SubElement(weekdays, day.value)
+
+    return tostring(task, encoding="unicode", xml_declaration=True)
+
+
+def build_monthly_xml(
+    script_path: str | Path,
+    trigger: MonthlyTrigger,
+    *,
+    wake_to_run: bool = False,
+) -> str:
+    """Serialize a monthly Python script task to Task Scheduler XML."""
+    script = Path(script_path).expanduser().resolve()
+    if not script.is_file():
+        raise FileNotFoundError(script)
+
+    task = _build_task(script, wake_to_run=wake_to_run)
+    triggers = task.find("Triggers")
+    if triggers is None:
+        raise RuntimeError("task XML is missing its trigger container")
+    monthly = SubElement(triggers, "CalendarTrigger")
+    local_date = datetime.now(timezone.utc).astimezone().date()
+    start = datetime.combine(local_date, trigger.at).replace(microsecond=0)
+    SubElement(monthly, "StartBoundary").text = start.isoformat()
+    SubElement(monthly, "Enabled").text = "true"
+    schedule = SubElement(monthly, "ScheduleByMonthDay")
+    days = SubElement(schedule, "DaysOfMonth")
+    SubElement(days, "Day").text = str(trigger.day)
+    months = SubElement(schedule, "Months")
+    for month in trigger.months:
+        SubElement(months, month.value)
 
     return tostring(task, encoding="unicode", xml_declaration=True)
 

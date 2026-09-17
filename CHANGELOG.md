@@ -4,6 +4,16 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-17
+
+### Added
+
+- Added `MonthlyTrigger` and `TaskScheduler.create_monthly()` for scheduling
+	Python scripts on a selected day of one or more months.
+- Added monthly Task Scheduler XML serialization and validation.
+- Added Dependabot coverage for Python packages managed through PyPI metadata
+	and `uv.lock`.
+
 ## [0.2.0] - 2026-09-17
 
 ### Added

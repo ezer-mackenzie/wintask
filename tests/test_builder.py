@@ -5,9 +5,14 @@ from pathlib import Path
 from unittest.mock import patch
 from xml.etree import ElementTree
 
-from wintask.builder import NAMESPACE, build_daily_xml, build_weekly_xml
+from wintask.builder import (
+    NAMESPACE,
+    build_daily_xml,
+    build_monthly_xml,
+    build_weekly_xml,
+)
 from wintask.scheduler import TaskScheduler
-from wintask.triggers import DailyTrigger, Weekday, WeeklyTrigger
+from wintask.triggers import DailyTrigger, Month, MonthlyTrigger, Weekday, WeeklyTrigger
 
 
 class BuilderTests(unittest.TestCase):
@@ -72,6 +77,38 @@ class BuilderTests(unittest.TestCase):
     def test_weekly_trigger_requires_days(self) -> None:
         with self.assertRaises(ValueError):
             WeeklyTrigger(time(9, 30), days=())
+
+    def test_monthly_schedule_is_serialized(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            script = Path(temporary_directory) / "job.py"
+            script.write_text("print('ok')", encoding="utf-8")
+
+            xml = build_monthly_xml(
+                script,
+                MonthlyTrigger(
+                    time(9, 30),
+                    day=15,
+                    months=(Month.JANUARY, Month.JUNE),
+                ),
+            )
+            root = ElementTree.fromstring(xml)
+            schedule = root.find(
+                f"{{{NAMESPACE}}}Triggers/{{{NAMESPACE}}}CalendarTrigger/"
+                f"{{{NAMESPACE}}}ScheduleByMonthDay"
+            )
+
+            self.assertIsNotNone(schedule)
+            assert schedule is not None
+            day = schedule.find(f"{{{NAMESPACE}}}DaysOfMonth/{{{NAMESPACE}}}Day")
+            self.assertIsNotNone(day)
+            assert day is not None
+            self.assertEqual(day.text, "15")
+            self.assertIsNotNone(schedule.find(f"{{{NAMESPACE}}}Months/{{{NAMESPACE}}}January"))
+            self.assertIsNotNone(schedule.find(f"{{{NAMESPACE}}}Months/{{{NAMESPACE}}}June"))
+
+    def test_monthly_trigger_rejects_invalid_days(self) -> None:
+        with self.assertRaises(ValueError):
+            MonthlyTrigger(time(9, 30), day=32, months=(Month.JANUARY,))
 
 
 if __name__ == "__main__":

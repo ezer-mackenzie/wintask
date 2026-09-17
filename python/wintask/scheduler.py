@@ -4,8 +4,8 @@ from datetime import time
 from pathlib import Path
 
 from . import _wintask_backend
-from .builder import build_daily_xml, build_weekly_xml
-from .triggers import DailyTrigger, Weekday, WeeklyTrigger
+from .builder import build_daily_xml, build_monthly_xml, build_weekly_xml
+from .triggers import DailyTrigger, Month, MonthlyTrigger, Weekday, WeeklyTrigger
 
 
 class TaskScheduler:
@@ -43,4 +43,18 @@ class TaskScheduler:
         """Register or update a task that runs on selected weekdays."""
         trigger = WeeklyTrigger(at, days=days)
         xml = build_weekly_xml(script_path, trigger, wake_to_run=wake_to_run)
+        _wintask_backend.register_xml(name, xml)
+
+    def create_monthly(
+        self,
+        name: str,
+        script_path: str | Path,
+        at: time,
+        day: int,
+        months: tuple[Month, ...],
+        wake_to_run: bool = False,
+    ) -> None:
+        """Register or update a task that runs on selected month days."""
+        trigger = MonthlyTrigger(at, day=day, months=months)
+        xml = build_monthly_xml(script_path, trigger, wake_to_run=wake_to_run)
         _wintask_backend.register_xml(name, xml)
