@@ -104,6 +104,7 @@ scheduler.create_daily(
     script_path="C:/Users/example/project/job.py",
     at=time(9, 30),
     wake_to_run=True,
+	interval=1,
 )
 
 scheduler.run("Example Python Job")
@@ -132,7 +133,7 @@ xml = build_daily_xml(
 
 ### `TaskScheduler`
 
-- `create_daily(name, script_path, at, wake_to_run=False)` registers or
+- `create_daily(name, script_path, at, wake_to_run=False, interval=1)` registers or
   updates a daily task.
 - `run(name)` starts an existing registered task.
 - `delete(name)` removes an existing registered task.
@@ -196,7 +197,7 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.1.0` is an initial implementation. Daily triggers and the basic
+Version `0.1.1` is the first patch release. Daily triggers and the basic
 register/run/delete lifecycle are covered; additional trigger types, richer
 settings, task folders, principals, and automated Windows integration tests are
 future work.

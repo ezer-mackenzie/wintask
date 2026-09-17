@@ -17,9 +17,10 @@ class TaskScheduler:
         script_path: str | Path,
         at: time,
         wake_to_run: bool = False,
+        interval: int = 1,
     ) -> None:
         """Register or update a task that runs a Python script daily."""
-        trigger = DailyTrigger(at)
+        trigger = DailyTrigger(at, interval=interval)
         xml = build_daily_xml(script_path, trigger, wake_to_run=wake_to_run)
         _wintask_backend.register_xml(name, xml)
 

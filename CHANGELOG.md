@@ -4,6 +4,12 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.1.1] - 2026-09-17
+
+### Fixed
+
+- Forwarded `DailyTrigger.interval` through `TaskScheduler.create_daily()`.
+
 ### Added
 
 - Documented the project's purpose, architecture, public API, setup, and
