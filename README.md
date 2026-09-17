@@ -111,6 +111,21 @@ scheduler.run("Example Python Job")
 scheduler.delete("Example Python Job")
 ```
 
+Weekly schedules are also supported:
+
+```python
+from datetime import time
+
+from wintask import TaskScheduler, Weekday
+
+TaskScheduler().create_weekly(
+	name="Weekday Python Job",
+	script_path="C:/Users/example/project/job.py",
+	at=time(9, 30),
+	days=(Weekday.MONDAY, Weekday.FRIDAY),
+)
+```
+
 `script_path` must point to an existing file. The time is a naive local
 `datetime.time`; timezone-aware times are rejected because Windows Task
 Scheduler interprets the generated boundary in the local machine context.
@@ -142,6 +157,15 @@ xml = build_daily_xml(
 
 - `at`: local time at which the task starts.
 - `interval`: number of days between runs; must be at least `1`.
+
+### `WeeklyTrigger`
+
+- `at`: local time at which the task starts.
+- `days`: one or more `Weekday` values.
+
+### `Weekday`
+
+Provides the `MONDAY` through `SUNDAY` values used by weekly triggers.
 
 ### `build_daily_xml`
 
@@ -197,7 +221,6 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.1.1` is the first patch release. Daily triggers and the basic
-register/run/delete lifecycle are covered; additional trigger types, richer
-settings, task folders, principals, and automated Windows integration tests are
-future work.
+Version `0.2.0` adds weekly triggers while preserving the daily scheduling and
+register/run/delete lifecycle. Richer settings, task folders, principals, and
+automated Windows integration tests remain future work.

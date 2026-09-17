@@ -1,4 +1,4 @@
 from .scheduler import TaskScheduler
-from .triggers import DailyTrigger
+from .triggers import DailyTrigger, Weekday, WeeklyTrigger
 
-__all__ = ["DailyTrigger", "TaskScheduler"]
+__all__ = ["DailyTrigger", "TaskScheduler", "Weekday", "WeeklyTrigger"]

@@ -4,6 +4,14 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-17
+
+### Added
+
+- Added `WeeklyTrigger` and `TaskScheduler.create_weekly()` for scheduling
+	Python scripts on selected weekdays.
+- Added XML serialization and validation for weekly schedules.
+
 ## [0.1.1] - 2026-09-17
 
 ### Fixed
