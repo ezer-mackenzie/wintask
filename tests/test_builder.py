@@ -82,6 +82,37 @@ class BuilderTests(unittest.TestCase):
             self.assertEqual(enabled.text, "false")
             self.assertEqual(working.text, str(working_directory.resolve()))
 
+    def test_task_description_is_serialized(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            script = Path(temporary_directory) / "job.py"
+            script.write_text("print('ok')", encoding="utf-8")
+
+            xml = build_daily_xml(
+                script,
+                DailyTrigger(time(9, 30)),
+                description="Runs the daily data refresh",
+            )
+            root = ElementTree.fromstring(xml)
+            description = root.find(
+                f"{{{NAMESPACE}}}RegistrationInfo/{{{NAMESPACE}}}Description"
+            )
+
+            self.assertIsNotNone(description)
+            assert description is not None
+            self.assertEqual(description.text, "Runs the daily data refresh")
+
+    def test_empty_task_description_is_rejected(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary_directory:
+            script = Path(temporary_directory) / "job.py"
+            script.write_text("print('ok')", encoding="utf-8")
+
+            with self.assertRaises(ValueError):
+                build_daily_xml(
+                    script,
+                    DailyTrigger(time(9, 30)),
+                    description="   ",
+                )
+
     def test_missing_working_directory_is_rejected(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             script = Path(temporary_directory) / "job.py"

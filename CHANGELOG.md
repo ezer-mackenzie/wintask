@@ -4,6 +4,13 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-09-18
+
+### Added
+
+- Added optional task descriptions for daily, weekly, and monthly schedules.
+- Renamed the validation workflow to `ci.yml`.
+
 ## [0.5.0] - 2026-09-17
 
 ### Added

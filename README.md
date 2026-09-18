@@ -108,6 +108,7 @@ scheduler.create_daily(
 	arguments=("--environment", "production"),
 	working_directory="C:/Users/example/project",
 	enabled=True,
+	description="Runs the daily data refresh",
 )
 
 scheduler.run("Example Python Job")
@@ -178,6 +179,7 @@ xml = build_daily_xml(
 - `working_directory`: existing directory used as the task process working
 	directory. Defaults to the script's parent directory.
 - `enabled`: whether the task is enabled when registered. Defaults to `True`.
+- `description`: optional text displayed in Task Scheduler's task metadata.
 - `run(name)` starts an existing registered task.
 - `delete(name)` removes an existing registered task.
 
@@ -259,7 +261,9 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.5.0` adds configurable working directories and enabled state for
+Version `0.6.0` adds task descriptions while preserving configurable working
+directories, enabled state, arguments, and all supported trigger schedules.
+Version `0.5.0` added configurable working directories and enabled state for
 every supported trigger while preserving the daily, weekly, and monthly
 scheduling lifecycle. Richer settings, task folders, principals, and automated
 Windows integration tests remain future work.

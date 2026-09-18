@@ -20,6 +20,7 @@ def build_daily_xml(
     arguments: Sequence[str] = (),
     working_directory: str | Path | None = None,
     enabled: bool = True,
+    description: str | None = None,
 ) -> str:
     """Serialize a daily Python script task to Task Scheduler XML."""
     script = Path(script_path).expanduser().resolve()
@@ -32,6 +33,7 @@ def build_daily_xml(
         arguments=arguments,
         working_directory=working_directory,
         enabled=enabled,
+        description=description,
     )
     triggers = task.find("Triggers")
     if triggers is None:
@@ -55,6 +57,7 @@ def build_weekly_xml(
     arguments: Sequence[str] = (),
     working_directory: str | Path | None = None,
     enabled: bool = True,
+    description: str | None = None,
 ) -> str:
     """Serialize a weekly Python script task to Task Scheduler XML."""
     script = Path(script_path).expanduser().resolve()
@@ -67,6 +70,7 @@ def build_weekly_xml(
         arguments=arguments,
         working_directory=working_directory,
         enabled=enabled,
+        description=description,
     )
     daily = task.find("Triggers")
     if daily is None:
@@ -93,6 +97,7 @@ def build_monthly_xml(
     arguments: Sequence[str] = (),
     working_directory: str | Path | None = None,
     enabled: bool = True,
+    description: str | None = None,
 ) -> str:
     """Serialize a monthly Python script task to Task Scheduler XML."""
     script = Path(script_path).expanduser().resolve()
@@ -105,6 +110,7 @@ def build_monthly_xml(
         arguments=arguments,
         working_directory=working_directory,
         enabled=enabled,
+        description=description,
     )
     triggers = task.find("Triggers")
     if triggers is None:
@@ -131,6 +137,7 @@ def _build_task(
     arguments: Sequence[str] = (),
     working_directory: str | Path | None = None,
     enabled: bool = True,
+    description: str | None = None,
 ) -> Element:
     directory = (
         Path(working_directory).expanduser().resolve()
@@ -141,7 +148,11 @@ def _build_task(
         raise NotADirectoryError(directory)
 
     task = Element("Task", {"xmlns": NAMESPACE, "version": "1.4"})
-    SubElement(task, "RegistrationInfo")
+    registration = SubElement(task, "RegistrationInfo")
+    if description is not None:
+        if not description.strip():
+            raise ValueError("description must not be empty")
+        SubElement(registration, "Description").text = description
     settings = SubElement(task, "Settings")
     SubElement(settings, "MultipleInstancesPolicy").text = "IgnoreNew"
     SubElement(settings, "DisallowStartIfOnBatteries").text = "false"

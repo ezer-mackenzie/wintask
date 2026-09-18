@@ -22,6 +22,7 @@ class TaskScheduler:
         arguments: Sequence[str] = (),
         working_directory: str | Path | None = None,
         enabled: bool = True,
+        description: str | None = None,
     ) -> None:
         """Register or update a task that runs a Python script daily."""
         trigger = DailyTrigger(at, interval=interval)
@@ -32,6 +33,7 @@ class TaskScheduler:
             arguments=arguments,
             working_directory=working_directory,
             enabled=enabled,
+            description=description,
         )
         _wintask_backend.register_xml(name, xml)
 
@@ -53,6 +55,7 @@ class TaskScheduler:
         arguments: Sequence[str] = (),
         working_directory: str | Path | None = None,
         enabled: bool = True,
+        description: str | None = None,
     ) -> None:
         """Register or update a task that runs on selected weekdays."""
         trigger = WeeklyTrigger(at, days=days)
@@ -63,6 +66,7 @@ class TaskScheduler:
             arguments=arguments,
             working_directory=working_directory,
             enabled=enabled,
+            description=description,
         )
         _wintask_backend.register_xml(name, xml)
 
@@ -77,6 +81,7 @@ class TaskScheduler:
         arguments: Sequence[str] = (),
         working_directory: str | Path | None = None,
         enabled: bool = True,
+        description: str | None = None,
     ) -> None:
         """Register or update a task that runs on selected month days."""
         trigger = MonthlyTrigger(at, day=day, months=months)
@@ -87,5 +92,6 @@ class TaskScheduler:
             arguments=arguments,
             working_directory=working_directory,
             enabled=enabled,
+            description=description,
         )
         _wintask_backend.register_xml(name, xml)
