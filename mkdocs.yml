@@ -1,0 +1,16 @@
+site_name: wintask
+site_description: Python API for Windows Task Scheduler powered by Rust and PyO3.
+site_url: https://wintask.readthedocs.io/
+repo_url: https://github.com/ezer-mackenzie/wintask
+repo_name: ezer-mackenzie/wintask
+
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Getting started: getting-started.md
+  - API reference: api.md
+  - Architecture: architecture.md
+
+strict: true

@@ -12,6 +12,11 @@ classifiers = [
 ]
 dynamic = ["version"]
 
+[dependency-groups]
+docs = [
+    "mkdocs>=1.6,<2.0",
+]
+
 [tool.maturin]
 module-name = "wintask._wintask_backend"
 python-source = "python"

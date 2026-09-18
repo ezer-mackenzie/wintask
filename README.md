@@ -1,5 +1,7 @@
 # wintask
 
+Read the full documentation at [wintask.readthedocs.io](https://wintask.readthedocs.io/).
+
 `wintask` is a Python library for managing Windows Task Scheduler tasks through
 the native Windows Task Scheduler COM API. Python provides the ergonomic API,
 validation, and Task Scheduler XML generation; Rust provides a small PyO3

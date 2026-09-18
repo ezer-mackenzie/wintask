@@ -4,6 +4,14 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-09-18
+
+### Added
+
+- Added a MkDocs documentation site with getting-started, API, and architecture
+	guides.
+- Added Read the Docs configuration and documentation build dependencies.
+
 ## [0.6.0] - 2026-09-18
 
 ### Added
