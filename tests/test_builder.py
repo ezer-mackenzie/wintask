@@ -155,6 +155,13 @@ class BuilderTests(unittest.TestCase):
         with self.assertRaises(TaskNameError):
             TaskScheduler().run("   ")
 
+        def test_scheduler_checks_task_existence(self) -> None:
+            with patch("wintask.scheduler._wintask_backend.task_exists", return_value=True):
+                self.assertTrue(TaskScheduler().exists("existing-task"))
+
+            with patch("wintask.scheduler._wintask_backend.task_exists", return_value=False):
+                self.assertFalse(TaskScheduler().exists("missing-task"))
+
     def test_weekly_days_are_serialized(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
             script = Path(temporary_directory) / "job.py"

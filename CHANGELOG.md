@@ -12,6 +12,14 @@ All notable changes to `wintask` are documented in this file.
 - Task names now reject empty values, control characters, and root-folder
 	separators before calling the native backend.
 
+## [0.9.0] - 2026-09-19
+
+### Added
+
+- Added `TaskScheduler.exists()` for idempotent task management.
+- Added the native `task_exists` operation without exposing the private backend
+	as part of the public Python API.
+
 ## [0.7.0] - 2026-09-18
 
 ### Added

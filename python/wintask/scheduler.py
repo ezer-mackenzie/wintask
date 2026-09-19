@@ -49,6 +49,11 @@ class TaskScheduler:
         name = validate_task_name(name)
         _wintask_backend.run_task(name)
 
+    def exists(self, name: str) -> bool:
+        """Return whether a task exists in the root Task Scheduler folder."""
+        name = validate_task_name(name)
+        return _wintask_backend.task_exists(name)
+
     def create_weekly(
         self,
         name: str,

@@ -28,6 +28,9 @@ DailyTrigger(at=time(9, 30), interval=1)
 ```
 
 `interval` must be at least `1`.
+`exists(name)` returns `True` when the task is registered and `False` when it
+is not, allowing callers to build idempotent automation.
+
 
 ### `WeeklyTrigger`
 

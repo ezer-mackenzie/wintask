@@ -137,10 +137,32 @@ fn run_task(task_name: &str) -> PyResult<()> {
     }
 }
 
+#[pyfunction]
+fn task_exists(task_name: &str) -> PyResult<bool> {
+    #[cfg(windows)]
+    {
+        let (_com, service) = connect_service()?;
+        let root = unsafe { service.GetFolder(&BSTR::from("\\")).map_err(map_windows_error)? };
+        match unsafe { root.GetTask(&BSTR::from(task_name)) } {
+            Ok(_) => Ok(true),
+            Err(error) if error.code().0 == -2147216625 => Ok(false),
+            Err(error) => Err(map_windows_error(error)),
+        }
+    }
+    #[cfg(not(windows))]
+    {
+        let _ = task_name;
+        Err(PyRuntimeError::new_err(
+            "wintask Task Scheduler support is only available on Windows",
+        ))
+    }
+}
+
 #[pymodule]
 fn _wintask_backend(m: &Bound<'_, PyModule>) -> PyResult<()> {
     m.add_function(wrap_pyfunction!(register_xml, m)?)?;
     m.add_function(wrap_pyfunction!(delete_task, m)?)?;
     m.add_function(wrap_pyfunction!(run_task, m)?)?;
+    m.add_function(wrap_pyfunction!(task_exists, m)?)?;
     Ok(())
 }

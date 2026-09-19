@@ -11,6 +11,9 @@ Invalid task names raise the public `TaskNameError` before any native call is
 made. Names must be non-empty and cannot contain control characters or
 backslashes because the current API registers tasks in the root folder.
 
+Use `TaskScheduler.exists(name)` to check whether a task is registered before
+creating, running, or deleting it.
+
 ## Purpose
 
 The project aims to make scheduled Python jobs predictable and easy to manage
@@ -31,6 +34,7 @@ The first release focuses on one reliable workflow:
 Python application
 	|
 	v
+	- `exists(name)` returns whether a task is registered.
 TaskScheduler -> builder -> Task Scheduler XML
 	|
 	v
