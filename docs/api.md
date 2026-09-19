@@ -10,6 +10,15 @@ start time, optional trigger-specific values, script `arguments`,
 Use `run(name)` to start a registered task immediately and `delete(name)` to
 remove it from the root Task Scheduler folder.
 
+Task names are validated before the native backend is called. Empty names,
+control characters, and backslashes raise `TaskNameError` because this release
+targets the root Task Scheduler folder.
+
+## Errors
+
+`TaskNameError` is raised for invalid task names. Native Windows failures are
+reported as Python runtime or permission errors by the Rust extension.
+
 ## Trigger models
 
 ### `DailyTrigger`

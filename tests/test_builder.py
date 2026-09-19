@@ -13,6 +13,7 @@ from wintask.builder import (
 )
 from wintask.scheduler import TaskScheduler
 from wintask.triggers import DailyTrigger, Month, MonthlyTrigger, Weekday, WeeklyTrigger
+from wintask.errors import TaskNameError
 
 
 class BuilderTests(unittest.TestCase):
@@ -146,6 +147,13 @@ class BuilderTests(unittest.TestCase):
                 )
 
             self.assertIn("<DaysInterval>3</DaysInterval>", register.call_args.args[1])
+
+    def test_scheduler_rejects_invalid_task_names(self) -> None:
+        with self.assertRaises(TaskNameError):
+            TaskScheduler().delete("folder\\task")
+
+        with self.assertRaises(TaskNameError):
+            TaskScheduler().run("   ")
 
     def test_weekly_days_are_serialized(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:

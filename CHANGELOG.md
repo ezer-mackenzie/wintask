@@ -4,6 +4,14 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.8.0] - 2026-09-19
+
+### Added
+
+- Added `TaskNameError` and centralized validation for task names.
+- Task names now reject empty values, control characters, and root-folder
+	separators before calling the native backend.
+
 ## [0.7.0] - 2026-09-18
 
 ### Added

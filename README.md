@@ -7,6 +7,10 @@ the native Windows Task Scheduler COM API. Python provides the ergonomic API,
 validation, and Task Scheduler XML generation; Rust provides a small PyO3
 bridge that owns COM initialization and calls `ITaskService`.
 
+Invalid task names raise the public `TaskNameError` before any native call is
+made. Names must be non-empty and cannot contain control characters or
+backslashes because the current API registers tasks in the root folder.
+
 ## Purpose
 
 The project aims to make scheduled Python jobs predictable and easy to manage
@@ -263,9 +267,8 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.6.0` adds task descriptions while preserving configurable working
-directories, enabled state, arguments, and all supported trigger schedules.
-Version `0.5.0` added configurable working directories and enabled state for
-every supported trigger while preserving the daily, weekly, and monthly
-scheduling lifecycle. Richer settings, task folders, principals, and automated
-Windows integration tests remain future work.
+Version `0.8.0` adds validated task names and Python tests in CI. The project
+supports descriptions, configurable working directories, enabled state,
+arguments, and daily, weekly, and monthly trigger schedules. Real Windows
+integration tests, richer principals, task folders, and detailed HRESULT
+exception types remain future work.

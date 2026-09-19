@@ -7,6 +7,7 @@ from pathlib import Path
 from . import _wintask_backend
 from .builder import build_daily_xml, build_monthly_xml, build_weekly_xml
 from .triggers import DailyTrigger, Month, MonthlyTrigger, Weekday, WeeklyTrigger
+from .validation import validate_task_name
 
 
 class TaskScheduler:
@@ -25,6 +26,7 @@ class TaskScheduler:
         description: str | None = None,
     ) -> None:
         """Register or update a task that runs a Python script daily."""
+        name = validate_task_name(name)
         trigger = DailyTrigger(at, interval=interval)
         xml = build_daily_xml(
             script_path,
@@ -39,10 +41,12 @@ class TaskScheduler:
 
     def delete(self, name: str) -> None:
         """Delete a task from the root Task Scheduler folder."""
+        name = validate_task_name(name)
         _wintask_backend.delete_task(name)
 
     def run(self, name: str) -> None:
         """Start a registered task immediately."""
+        name = validate_task_name(name)
         _wintask_backend.run_task(name)
 
     def create_weekly(
@@ -58,6 +62,7 @@ class TaskScheduler:
         description: str | None = None,
     ) -> None:
         """Register or update a task that runs on selected weekdays."""
+        name = validate_task_name(name)
         trigger = WeeklyTrigger(at, days=days)
         xml = build_weekly_xml(
             script_path,
@@ -84,6 +89,7 @@ class TaskScheduler:
         description: str | None = None,
     ) -> None:
         """Register or update a task that runs on selected month days."""
+        name = validate_task_name(name)
         trigger = MonthlyTrigger(at, day=day, months=months)
         xml = build_monthly_xml(
             script_path,
