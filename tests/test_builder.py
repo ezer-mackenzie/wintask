@@ -155,12 +155,32 @@ class BuilderTests(unittest.TestCase):
         with self.assertRaises(TaskNameError):
             TaskScheduler().run("   ")
 
-        def test_scheduler_checks_task_existence(self) -> None:
-            with patch("wintask.scheduler._wintask_backend.task_exists", return_value=True):
-                self.assertTrue(TaskScheduler().exists("existing-task"))
+    def test_scheduler_checks_task_existence(self) -> None:
+        for expected in (True, False):
+            with self.subTest(expected=expected):
+                with patch(
+                    "wintask.scheduler._wintask_backend.task_exists",
+                    return_value=expected,
+                ) as exists:
+                    self.assertIs(TaskScheduler().exists("test-task"), expected)
+                    exists.assert_called_once_with("test-task")
 
-            with patch("wintask.scheduler._wintask_backend.task_exists", return_value=False):
-                self.assertFalse(TaskScheduler().exists("missing-task"))
+    def test_scheduler_exists_rejects_invalid_names_before_native_call(self) -> None:
+        with patch("wintask.scheduler._wintask_backend.task_exists") as exists:
+            for name in ("", "   ", "folder\\task", "task\n"):
+                with self.subTest(name=name), self.assertRaises(TaskNameError):
+                    TaskScheduler().exists(name)
+            exists.assert_not_called()
+
+    def test_scheduler_exists_preserves_native_errors(self) -> None:
+        for error in (PermissionError("denied"), RuntimeError("COM failure")):
+            with self.subTest(error=error):
+                with patch(
+                    "wintask.scheduler._wintask_backend.task_exists", side_effect=error
+                ):
+                    with self.assertRaises(type(error)) as caught:
+                        TaskScheduler().exists("test-task")
+                    self.assertIs(caught.exception, error)
 
     def test_weekly_days_are_serialized(self) -> None:
         with tempfile.TemporaryDirectory() as temporary_directory:
@@ -202,7 +222,7 @@ class BuilderTests(unittest.TestCase):
             root = ElementTree.fromstring(xml)
             schedule = root.find(
                 f"{{{NAMESPACE}}}Triggers/{{{NAMESPACE}}}CalendarTrigger/"
-                f"{{{NAMESPACE}}}ScheduleByMonthDay"
+                f"{{{NAMESPACE}}}ScheduleByMonth"
             )
 
             self.assertIsNotNone(schedule)

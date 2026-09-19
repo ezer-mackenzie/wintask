@@ -10,6 +10,10 @@ start time, optional trigger-specific values, script `arguments`,
 Use `run(name)` to start a registered task immediately and `delete(name)` to
 remove it from the root Task Scheduler folder.
 
+`exists(name)` returns `True` when the task is registered in the root folder
+and `False` when it is not. Permission and other native errors still raise
+exceptions.
+
 Task names are validated before the native backend is called. Empty names,
 control characters, and backslashes raise `TaskNameError` because this release
 targets the root Task Scheduler folder.
@@ -28,9 +32,6 @@ DailyTrigger(at=time(9, 30), interval=1)
 ```
 
 `interval` must be at least `1`.
-`exists(name)` returns `True` when the task is registered and `False` when it
-is not, allowing callers to build idempotent automation.
-
 
 ### `WeeklyTrigger`
 

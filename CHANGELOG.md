@@ -4,14 +4,6 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
-## [0.8.0] - 2026-09-19
-
-### Added
-
-- Added `TaskNameError` and centralized validation for task names.
-- Task names now reject empty values, control characters, and root-folder
-	separators before calling the native backend.
-
 ## [0.9.0] - 2026-09-19
 
 ### Added
@@ -19,6 +11,21 @@ All notable changes to `wintask` are documented in this file.
 - Added `TaskScheduler.exists()` for idempotent task management.
 - Added the native `task_exists` operation without exposing the private backend
 	as part of the public Python API.
+
+### Fixed
+
+- Treat native file/path-not-found errors as absent tasks while preserving other errors.
+- Use the valid `ScheduleByMonth` XML element for monthly tasks.
+- Omit the byte-encoding declaration from Unicode task XML passed to COM.
+- Ensure existence checks run in the test suite and add opt-in Windows lifecycle coverage.
+
+## [0.8.0] - 2026-09-19
+
+### Added
+
+- Added `TaskNameError` and centralized validation for task names.
+- Task names now reject empty values, control characters, and root-folder
+	separators before calling the native backend.
 
 ## [0.7.0] - 2026-09-18
 

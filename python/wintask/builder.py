@@ -9,6 +9,7 @@ from xml.etree.ElementTree import Element, SubElement, tostring
 
 from .triggers import DailyTrigger, MonthlyTrigger, WeeklyTrigger
 
+# COM receives Unicode XML as a BSTR; omit a conflicting byte-encoding declaration.
 NAMESPACE = "http://schemas.microsoft.com/windows/2004/02/mit/task"
 
 
@@ -46,7 +47,7 @@ def build_daily_xml(
     repetition = SubElement(daily, "ScheduleByDay")
     SubElement(repetition, "DaysInterval").text = str(trigger.interval)
 
-    return tostring(task, encoding="unicode", xml_declaration=True)
+    return tostring(task, encoding="unicode", xml_declaration=False)
 
 
 def build_weekly_xml(
@@ -86,7 +87,7 @@ def build_weekly_xml(
     for day in trigger.days:
         SubElement(weekdays, day.value)
 
-    return tostring(task, encoding="unicode", xml_declaration=True)
+    return tostring(task, encoding="unicode", xml_declaration=False)
 
 
 def build_monthly_xml(
@@ -120,14 +121,14 @@ def build_monthly_xml(
     start = datetime.combine(local_date, trigger.at).replace(microsecond=0)
     SubElement(monthly, "StartBoundary").text = start.isoformat()
     SubElement(monthly, "Enabled").text = "true"
-    schedule = SubElement(monthly, "ScheduleByMonthDay")
+    schedule = SubElement(monthly, "ScheduleByMonth")
     days = SubElement(schedule, "DaysOfMonth")
     SubElement(days, "Day").text = str(trigger.day)
     months = SubElement(schedule, "Months")
     for month in trigger.months:
         SubElement(months, month.value)
 
-    return tostring(task, encoding="unicode", xml_declaration=True)
+    return tostring(task, encoding="unicode", xml_declaration=False)
 
 
 def _build_task(

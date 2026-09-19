@@ -34,7 +34,6 @@ The first release focuses on one reliable workflow:
 Python application
 	|
 	v
-	- `exists(name)` returns whether a task is registered.
 TaskScheduler -> builder -> Task Scheduler XML
 	|
 	v
@@ -192,6 +191,8 @@ xml = build_daily_xml(
 - `description`: optional text displayed in Task Scheduler's task metadata.
 - `run(name)` starts an existing registered task.
 - `delete(name)` removes an existing registered task.
+- `exists(name)` returns whether a task is registered in the root folder.
+  Missing tasks return `False`; permission and other native errors propagate.
 
 ### `DailyTrigger`
 
@@ -254,8 +255,12 @@ Verify installation and import:
 uv run python -c "from wintask import DailyTrigger, TaskScheduler; print('wintask import: OK')"
 ```
 
-Actual registration, execution, and deletion should be tested on a Windows
-machine with an isolated task name and a disposable script.
+Run the opt-in Windows integration test (creates and deletes a disabled task):
+
+```powershell
+$env:WINTASK_INTEGRATION = "1"
+uv run python -m unittest discover -s tests -v
+```
 
 ## Project layout
 
@@ -271,8 +276,7 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-Version `0.8.0` adds validated task names and Python tests in CI. The project
+Version `0.9.0` adds task existence checks with validated task names. The project
 supports descriptions, configurable working directories, enabled state,
-arguments, and daily, weekly, and monthly trigger schedules. Real Windows
-integration tests, richer principals, task folders, and detailed HRESULT
+arguments, and daily, weekly, and monthly trigger schedules. Richer principals, task folders, and detailed HRESULT
 exception types remain future work.

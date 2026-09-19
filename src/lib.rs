@@ -5,12 +5,15 @@ use pyo3::prelude::*;
 use windows::core::BSTR;
 
 #[cfg(windows)]
+use windows::Win32::Foundation::{ERROR_FILE_NOT_FOUND, ERROR_PATH_NOT_FOUND};
+
+#[cfg(windows)]
 use windows::Win32::System::Com::{
-    CoCreateInstance, CoInitializeEx, CoUninitialize, CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED,
+    CLSCTX_INPROC_SERVER, COINIT_MULTITHREADED, CoCreateInstance, CoInitializeEx, CoUninitialize,
 };
 #[cfg(windows)]
 use windows::Win32::System::TaskScheduler::{
-    ITaskService, TaskScheduler, TASK_CREATE_OR_UPDATE, TASK_LOGON_INTERACTIVE_TOKEN,
+    ITaskService, TASK_CREATE_OR_UPDATE, TASK_LOGON_INTERACTIVE_TOKEN, TaskScheduler,
 };
 #[cfg(windows)]
 use windows::Win32::System::Variant::VARIANT;
@@ -70,7 +73,11 @@ fn register_xml(task_name: &str, xml_data: &str) -> PyResult<()> {
     #[cfg(windows)]
     {
         let (_com, service) = connect_service()?;
-        let root = unsafe { service.GetFolder(&BSTR::from("\\")).map_err(map_windows_error)? };
+        let root = unsafe {
+            service
+                .GetFolder(&BSTR::from("\\"))
+                .map_err(map_windows_error)?
+        };
         unsafe {
             root.RegisterTask(
                 &BSTR::from(task_name),
@@ -99,7 +106,11 @@ fn delete_task(task_name: &str) -> PyResult<()> {
     #[cfg(windows)]
     {
         let (_com, service) = connect_service()?;
-        let root = unsafe { service.GetFolder(&BSTR::from("\\")).map_err(map_windows_error)? };
+        let root = unsafe {
+            service
+                .GetFolder(&BSTR::from("\\"))
+                .map_err(map_windows_error)?
+        };
         unsafe {
             root.DeleteTask(&BSTR::from(task_name), 0)
                 .map_err(map_windows_error)?;
@@ -120,8 +131,15 @@ fn run_task(task_name: &str) -> PyResult<()> {
     #[cfg(windows)]
     {
         let (_com, service) = connect_service()?;
-        let root = unsafe { service.GetFolder(&BSTR::from("\\")).map_err(map_windows_error)? };
-        let task = unsafe { root.GetTask(&BSTR::from(task_name)).map_err(map_windows_error)? };
+        let root = unsafe {
+            service
+                .GetFolder(&BSTR::from("\\"))
+                .map_err(map_windows_error)?
+        };
+        let task = unsafe {
+            root.GetTask(&BSTR::from(task_name))
+                .map_err(map_windows_error)?
+        };
         unsafe {
             task.RunEx(VARIANT::default(), 0, 0, &BSTR::new())
                 .map_err(map_windows_error)?;
@@ -142,10 +160,19 @@ fn task_exists(task_name: &str) -> PyResult<bool> {
     #[cfg(windows)]
     {
         let (_com, service) = connect_service()?;
-        let root = unsafe { service.GetFolder(&BSTR::from("\\")).map_err(map_windows_error)? };
+        let root = unsafe {
+            service
+                .GetFolder(&BSTR::from("\\"))
+                .map_err(map_windows_error)?
+        };
         match unsafe { root.GetTask(&BSTR::from(task_name)) } {
             Ok(_) => Ok(true),
-            Err(error) if error.code().0 == -2147216625 => Ok(false),
+            Err(error)
+                if error.code() == ERROR_FILE_NOT_FOUND.to_hresult()
+                    || error.code() == ERROR_PATH_NOT_FOUND.to_hresult() =>
+            {
+                Ok(false)
+            }
             Err(error) => Err(map_windows_error(error)),
         }
     }
