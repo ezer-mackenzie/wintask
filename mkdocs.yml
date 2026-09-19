@@ -12,5 +12,6 @@ nav:
   - Getting started: getting-started.md
   - API reference: api.md
   - Architecture: architecture.md
+  - Roadmap to 1.0: roadmap-1.0.md
 
 strict: true

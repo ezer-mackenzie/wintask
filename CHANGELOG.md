@@ -4,6 +4,17 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+### Changed
+
+- Validate release tags, package versions, changelog, tests and docs before publishing.
+- Build release artifacts from the validated commit and test installed Windows wheels.
+- Serialize publication of the same version and check PyPI for existing files on retries.
+- Preserve manual dispatch and automatic publication when a GitHub release is published.
+
+### Added
+
+- Pre-1.0 audit with reproduced failures, support gaps and acceptance criteria.
+
 ## [0.9.0] - 2026-09-19
 
 ### Added

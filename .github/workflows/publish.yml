@@ -6,15 +6,66 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: "Release tag to build and publish, for example v0.5.0"
+        description: "Release tag to build and publish, for example v0.9.0"
         required: true
         type: string
+
+# Serialize manual and release-triggered publication of the same version.
+concurrency:
+  group: release-${{ github.event.release.tag_name || inputs.tag }}
+  cancel-in-progress: false
 
 permissions:
   contents: read
 
 jobs:
+  validate:
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.source.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Validate release version
+        env:
+          RELEASE_TAG: ${{ github.event.release.tag_name || inputs.tag }}
+        run: |
+          python - <<'PY'
+          import os
+          import re
+          import tomllib
+          from pathlib import Path
+
+          tag = os.environ["RELEASE_TAG"]
+          cargo = tomllib.loads(Path("Cargo.toml").read_text())
+          version = cargo["package"]["version"]
+          if not re.fullmatch(r"v[0-9]+\.[0-9]+\.[0-9]+(?:-[0-9A-Za-z.-]+)?", tag):
+              raise SystemExit(f"Invalid release tag: {tag!r}")
+          if tag != f"v{version}":
+              raise SystemExit(f"Tag {tag!r} does not match Cargo version {version!r}")
+          lock = tomllib.loads(Path("Cargo.lock").read_text())
+          package = next(p for p in lock["package"] if p["name"] == "wintask")
+          if package["version"] != version:
+              raise SystemExit("Cargo.lock version does not match Cargo.toml")
+          if f"## [{version}] - " not in Path("CHANGELOG.md").read_text():
+              raise SystemExit("Missing dated changelog entry for this version")
+          if not Path("tests/test_windows_integration.py").is_file():
+              raise SystemExit("Release must include Windows integration tests")
+          PY
+      - name: Resolve immutable build commit
+        id: source
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+      - uses: astral-sh/setup-uv@v7
+      - run: uv sync --locked --group docs
+      - run: uv run python -m unittest discover -s tests -v
+      - run: uv run --group docs mkdocs build --strict
+
   linux:
+    needs: validate
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -34,7 +85,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ needs.validate.outputs.sha }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -49,6 +100,7 @@ jobs:
           path: dist
 
   musllinux:
+    needs: validate
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -64,7 +116,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ needs.validate.outputs.sha }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -79,6 +131,7 @@ jobs:
           path: dist
 
   windows:
+    needs: validate
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -95,7 +148,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ needs.validate.outputs.sha }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.13"
@@ -104,12 +157,21 @@ jobs:
         with:
           target: ${{ matrix.platform.target }}
           args: --release --out dist --find-interpreter
+      - name: Test installed Windows wheel
+        env:
+          WINTASK_INTEGRATION: "1"
+        run: |
+          python -m pip install --force-reinstall --no-deps --no-index --find-links dist wintask
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - uses: actions/upload-artifact@v6
         with:
           name: wheels-windows-${{ matrix.platform.target }}
           path: dist
 
   macos:
+    needs: validate
     runs-on: ${{ matrix.platform.runner }}
     strategy:
       matrix:
@@ -121,7 +183,7 @@ jobs:
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ needs.validate.outputs.sha }}
       - uses: actions/setup-python@v6
         with:
           python-version: "3.x"
@@ -135,11 +197,12 @@ jobs:
           path: dist
 
   sdist:
+    needs: validate
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v6
         with:
-          ref: refs/tags/${{ github.event.release.tag_name || inputs.tag }}
+          ref: ${{ needs.validate.outputs.sha }}
       - uses: PyO3/maturin-action@v1
         with:
           command: sdist
@@ -161,4 +224,4 @@ jobs:
       - uses: actions/download-artifact@v7
       - uses: astral-sh/setup-uv@v7
       - name: Publish to PyPI
-        run: uv publish --trusted-publishing always "wheels-*/*"
+        run: uv publish --trusted-publishing always --check-url https://pypi.org/simple/ "wheels-*/*"

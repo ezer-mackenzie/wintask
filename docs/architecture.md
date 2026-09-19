@@ -25,7 +25,7 @@ interpreter from the active environment.
 ## Rust layer
 
 Rust owns COM initialization through RAII, connects to `Schedule.Service`, and
-exposes only `register_xml`, `run_task`, and `delete_task` to Python. Windows
+exposes `register_xml`, `run_task`, `delete_task`, and `task_exists` to Python. Windows
 errors are translated into Python exceptions.
 
 The `_wintask_backend` name is intentionally private. Applications should use
