@@ -1,8 +1,9 @@
-# Pre-1.0 audit and release plan
+# 1.0.0 release-readiness report
 
-Updated September 19, 2026 for the **0.10.0 candidate**. The source-level findings
-from the 0.9.0 audit have been addressed and verified locally. **1.0.0 is still
-blocked on remote CI and a release rehearsal**, not on reaching a feature count.
+Updated September 20, 2026 for the **1.0.0 release candidate**. The source-level
+findings from the 0.9.0 audit have been addressed and verified locally. **1.0.0
+is still blocked on remote CI and a release rehearsal**, not on reaching a
+feature count.
 Task folders, alternative credentials and new scheduling features are outside
 this stable-release scope.
 
@@ -12,7 +13,7 @@ become stable, including deliberate limitations and compatibility changes.
 
 ## Completed implementation and evidence
 
-| ID | Original finding | Resolution in 0.10.0 | Evidence |
+| ID | Original finding | Resolution in 1.0.0 | Evidence |
 | --- | --- | --- | --- |
 | V1 | Booleans, fractional intervals/days and intervals over 365 were accepted. | Strict integer ranges, typed time values, whole seconds, no timezone/fold ambiguity. | Boundary/type tests across daily, weekly and monthly triggers. |
 | V2 | A string argument container split into characters; flags/text were not validated. | Validate argument containers/elements, booleans and XML text. Preserve carriage returns through XML normalization. | Rejection-before-COM tests and native round-trip of spaces, quotes, empty arguments, CR/LF, tabs and Unicode. |
@@ -69,27 +70,27 @@ succeeded. Two PR runs failed building Windows x64
 [older run](https://github.com/ezer-mackenzie/wintask/actions/runs/35316276136)
 failed building Linux armv7. The first PR belongs to a Dependabot Rust-dependency
 update. Its public annotation only reports maturin exit code 1, not a root cause.
-The candidate retains the working locked dependency set; do not adopt a failing
-update without inspecting its full log and rerunning the native matrix.
+The release candidate retains the working locked dependency set; do not adopt a
+failing update without inspecting its full log and rerunning the native matrix.
 
 ## Remaining stable-release gate
 
-1. Push the reviewed candidate and obtain green CI for its exact commit,
+1. Push the reviewed 1.0.0 commit and obtain green CI for its exact commit,
    including Windows Server 2022/current hosted Windows, experimental architecture
    jobs, portable tests, Rust minimum, docs, and source-install checks. Local x64
    results do not stand in for these environments.
-2. Run `Release` manually with the candidate tag and **`publish=false`**. Record
+2. Run `Release` manually with `v1.0.0` and **`publish=false`**. Record
    the workflow URL and confirm the PyPI job is skipped while all gates run.
-3. Publish a correctly versioned release candidate using the GitHub release
-   path. Verify Trusted Publishing and install the resulting PyPI artifacts in
-   clean environments. Record that workflow URL and the artifact version.
-4. Review any failures and API compatibility changes. Only then freeze the
-   contract and publish 1.0.0. Do not relabel the 0.10.0 candidate as stable.
+3. Publish the `v1.0.0` GitHub release. Verify Trusted Publishing and install
+   the resulting PyPI artifacts in clean environments. Record that workflow URL
+   and the artifact version.
+4. Review any release failures before retrying. The API contract is frozen for
+   this version; do not move the tag or replace published artifacts.
 
 These steps have not been executed in this session: no push, tag creation,
 GitHub release or PyPI publication has been performed. The implementation work
-originally proposed across 0.10-0.12 is consolidated into 0.10.0; additional
-pre-1.0 versions should be driven by verification findings.
+originally proposed across 0.10-0.12 is included in 1.0.0; any post-release
+work should be driven by verification findings.
 
 ## Publication semantics
 

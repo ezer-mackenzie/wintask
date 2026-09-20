@@ -1,7 +1,7 @@
 # Support and scheduling contract
 
-This contract describes the candidate for 0.10.0. Stable 1.0 publication still
-requires the remote checks and release rehearsal listed in the roadmap.
+This is the stable API contract for 1.0.0. Publishing still requires the remote
+checks and release rehearsal listed in the roadmap.
 
 ## Supported configurations
 
@@ -110,10 +110,9 @@ users' task ACLs to force failures.
    from the source distribution. Review the exact commit being released.
 3. Use the manual `Release` workflow with `publish=false` for a non-publishing
    rehearsal. The same build and test gates run; the PyPI job is skipped.
-4. Exercise Trusted Publishing on a correctly versioned release candidate
-   before 1.0. Publishing a GitHub release/prerelease enables publication to
-   PyPI. Its prerelease flag must agree with the version (such as
-   `1.0.0-rc.1` in Cargo and `v1.0.0-rc.1` as the tag).
+4. Exercise Trusted Publishing through a non-publishing rehearsal before the
+   stable release. Publishing a GitHub release enables publication to PyPI. A
+   prerelease flag is valid only when it agrees with a prerelease package version.
 5. Reinstall the published artifacts in a clean environment and record the
    workflow URLs in the roadmap. Do not claim the stable gate is complete until
    these external checks have actually run.

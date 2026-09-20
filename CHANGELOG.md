@@ -4,7 +4,7 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
-## [0.10.0] - 2026-09-19
+## [1.0.0] - 2026-09-20
 
 ### Fixed
 

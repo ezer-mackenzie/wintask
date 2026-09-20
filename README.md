@@ -284,10 +284,10 @@ python/wintask/builder.py  Task Scheduler XML serialization
 
 ## Project status
 
-See the [pre-1.0 audit and release plan](docs/roadmap-1.0.md) for confirmed
-issues, support gaps, and stable-release acceptance criteria.
+See the [1.0 release-readiness report](docs/roadmap-1.0.md) for the audit,
+verification evidence, and external release gates.
 
-Version `0.10.0` hardens validation, COM ownership, error reporting and release
+Version `1.0.0` hardens validation, COM ownership, error reporting and release
 verification. The project supports descriptions, configurable working
 directories, enabled state, arguments, and daily, weekly, and monthly trigger
 schedules. Richer principals and task folders remain outside the current API.
