@@ -8,8 +8,9 @@ validation, and Task Scheduler XML generation; Rust provides a small PyO3
 bridge that owns COM initialization and calls `ITaskService`.
 
 Invalid task names raise the public `TaskNameError` before any native call is
-made. Names must be non-empty and cannot contain control characters or
-backslashes because the current API registers tasks in the root folder.
+made. Names use the conservative root-folder policy described in the
+[support contract](docs/support.md#input-validation), including a 200 UTF-16
+code-unit limit and rejection of reserved path/control characters.
 
 Use `TaskScheduler.exists(name)` to check whether a task is registered before
 creating, running, or deleting it.
@@ -64,15 +65,16 @@ The Rust extension is deliberately narrow. It is responsible for:
 - Initializing and uninitializing COM with RAII.
 - Connecting to `Schedule.Service` through `ITaskService`.
 - Registering XML, deleting tasks, and starting registered tasks.
-- Translating Windows errors into Python runtime or permission exceptions.
+- Translating Windows errors into public exceptions that retain the HRESULT and
+  native operation.
 
 Rust does not decide scheduling policy or build business-level XML.
 
 ## Requirements
 
 - Windows for actual Task Scheduler operations.
-- Python 3.9 or newer.
-- Rust toolchain with Cargo.
+- Standard CPython 3.9 through 3.14; see the [support matrix](docs/support.md).
+- Rust 1.85+ with Cargo when building from source.
 - `uv` for environment and dependency management.
 - `maturin` 1.15 or newer, installed by the project build configuration.
 
@@ -175,6 +177,11 @@ xml = build_daily_xml(
 
 ## Public API
 
+Native access denials raise `TaskPermissionError` (`PermissionError`); other
+native failures raise `TaskSchedulerError` (`RuntimeError`). Both expose
+`hresult` and `operation`. See the [support and scheduling contract](docs/support.md)
+for time semantics, COM/thread behavior and platform limitations.
+
 ### `TaskScheduler`
 
 - `create_daily(name, script_path, at, wake_to_run=False, interval=1,
@@ -197,7 +204,7 @@ xml = build_daily_xml(
 ### `DailyTrigger`
 
 - `at`: local time at which the task starts.
-- `interval`: number of days between runs; must be at least `1`.
+- `interval`: integer number of days between runs, from `1` through `365`.
 
 ### `WeeklyTrigger`
 
@@ -255,7 +262,8 @@ Verify installation and import:
 uv run python -c "from wintask import DailyTrigger, TaskScheduler; print('wintask import: OK')"
 ```
 
-Run the opt-in Windows integration test (creates and deletes a disabled task):
+Run the opt-in Windows integration tests (create/update/run/delete isolated tasks
+and execute a harmless script that writes a temporary marker):
 
 ```powershell
 $env:WINTASK_INTEGRATION = "1"
@@ -279,7 +287,7 @@ python/wintask/builder.py  Task Scheduler XML serialization
 See the [pre-1.0 audit and release plan](docs/roadmap-1.0.md) for confirmed
 issues, support gaps, and stable-release acceptance criteria.
 
-Version `0.9.0` adds task existence checks with validated task names. The project
-supports descriptions, configurable working directories, enabled state,
-arguments, and daily, weekly, and monthly trigger schedules. Richer principals, task folders, and detailed HRESULT
-exception types remain future work.
+Version `0.10.0` hardens validation, COM ownership, error reporting and release
+verification. The project supports descriptions, configurable working
+directories, enabled state, arguments, and daily, weekly, and monthly trigger
+schedules. Richer principals and task folders remain outside the current API.

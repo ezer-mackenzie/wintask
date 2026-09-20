@@ -4,6 +4,15 @@ All notable changes to `wintask` are documented in this file.
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-09-19
+
+### Fixed
+
+- Validate integer ranges, task names, local times, XML text, arguments and boolean flags before COM.
+- Respect existing STA/MTA COM initialization and release the GIL during native calls.
+- Preserve native HRESULT and operation in consistent public permission/runtime exceptions.
+
+
 ### Changed
 
 - Validate release tags, package versions, changelog, tests and docs before publishing.
@@ -13,6 +22,9 @@ All notable changes to `wintask` are documented in this file.
 
 ### Added
 
+- Native execution, update, apartment ownership, concurrency and validation regression tests.
+- Explicit scheduling/support contracts, complete distribution metadata and wheel/sdist checks.
+- CPython 3.9-3.14 Windows x64 test matrix and a non-publishing release rehearsal option.
 - Pre-1.0 audit with reproduced failures, support gaps and acceptance criteria.
 
 ## [0.9.0] - 2026-09-19

@@ -28,4 +28,5 @@ TaskScheduler().create_daily(
 ```
 
 Continue with [Getting started](getting-started.md), or inspect the
-[API reference](api.md) and [Architecture](architecture.md).
+[API reference](api.md), [support contract](support.md), and
+[Architecture](architecture.md).

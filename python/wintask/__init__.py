@@ -1,4 +1,4 @@
-from .errors import TaskNameError
+from .errors import TaskNameError, TaskPermissionError, TaskSchedulerError
 from .scheduler import TaskScheduler
 from .triggers import DailyTrigger, Month, MonthlyTrigger, Weekday, WeeklyTrigger
 
@@ -7,7 +7,9 @@ __all__ = [
 	"Month",
 	"MonthlyTrigger",
 	"TaskNameError",
+	"TaskPermissionError",
 	"TaskScheduler",
+	"TaskSchedulerError",
 	"Weekday",
 	"WeeklyTrigger",
 ]

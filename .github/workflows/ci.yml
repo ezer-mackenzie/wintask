@@ -13,13 +13,37 @@ permissions:
 
 jobs:
   tests:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      matrix:
+        runner: [ubuntu-latest, macos-15-intel]
+        python: ["3.9", "3.14"]
     steps:
       - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
       - uses: astral-sh/setup-uv@v7
+        with:
+          python-version: ${{ matrix.python }}
       - run: uv sync --locked
       - run: cargo fmt --check
       - run: uv run python -m unittest discover -s tests -v
+
+  msrv:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - name: Check minimum Rust version
+        run: |
+          rustup toolchain install 1.85.0 --profile minimal
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          $env:PYO3_PYTHON = python -c "import sys; print(sys.executable)"
+          cargo +1.85.0 check --locked
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
   docs:
     runs-on: ubuntu-latest
@@ -50,7 +74,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.x"
+          python-version: "3.14"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -81,7 +105,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.x"
+          python-version: "3.14"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -96,31 +120,74 @@ jobs:
           path: dist
 
   windows:
-    runs-on: ${{ matrix.platform.runner }}
+    runs-on: ${{ matrix.runner }}
     strategy:
       matrix:
-        platform:
+        include:
           - runner: windows-latest
             target: x64
+            rust_target: x86_64-pc-windows-msvc
             python_arch: x64
+            python: "3.9"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.10"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.11"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.12"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.13"
+          - runner: windows-latest
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.14"
+          - runner: windows-2022
+            target: x64
+            rust_target: x86_64-pc-windows-msvc
+            python_arch: x64
+            python: "3.13"
           - runner: windows-latest
             target: x86
+            rust_target: i686-pc-windows-msvc
             python_arch: x86
+            python: "3.13"
           - runner: windows-11-arm
             target: aarch64
+            rust_target: aarch64-pc-windows-msvc
             python_arch: arm64
+            python: "3.13"
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.13"
-          architecture: ${{ matrix.platform.python_arch }}
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.python_arch }}
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
-          target: ${{ matrix.platform.target }}
-          args: --release --out dist --find-interpreter
+          target: ${{ matrix.target }}
+          args: --release --locked --out dist --interpreter python
           sccache: ${{ !startsWith(github.ref, 'refs/tags/') }}
+      - name: Test native error mapping
+        run: |
+          $env:PYO3_PYTHON = python -c "import sys; print(sys.executable)"
+          cargo test --locked --target ${{ matrix.rust_target }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Validate wheel contents
+        run: python tools/validate_distribution.py dist
       - name: Test installed Windows wheel
         env:
           WINTASK_INTEGRATION: "1"
@@ -130,9 +197,10 @@ jobs:
           python -m unittest discover -s tests -v
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Upload wheels
+        if: matrix.runner != 'windows-2022'
         uses: actions/upload-artifact@v6
         with:
-          name: wheels-windows-${{ matrix.platform.target }}
+          name: wheels-windows-${{ matrix.runner }}-${{ matrix.target }}-${{ matrix.python }}
           path: dist
 
   macos:
@@ -148,7 +216,7 @@ jobs:
       - uses: actions/checkout@v6
       - uses: actions/setup-python@v6
         with:
-          python-version: "3.x"
+          python-version: "3.14"
       - name: Build wheels
         uses: PyO3/maturin-action@v1
         with:
@@ -162,16 +230,40 @@ jobs:
           path: dist
 
   sdist:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     steps:
       - uses: actions/checkout@v6
-      - name: Build sdist
-        uses: PyO3/maturin-action@v1
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+      - uses: astral-sh/setup-uv@v7
+      - uses: PyO3/maturin-action@v1
         with:
           command: sdist
           args: --out dist
-      - name: Upload sdist
-        uses: actions/upload-artifact@v6
+      - name: Check distribution metadata
+        run: |
+          uv sync --locked --group release
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          uv run --group release python -m twine check --strict dist/*
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/validate_distribution.py dist
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Rebuild and test source distribution
+        env:
+          WINTASK_INTEGRATION: "1"
+        run: |
+          $source = @(Get-ChildItem dist/*.tar.gz)
+          if ($source.Count -ne 1) { throw "Expected one source distribution" }
+          python -m pip wheel --no-deps --wheel-dir rebuilt $source[0].FullName
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python tools/validate_distribution.py rebuilt
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m pip install --force-reinstall --no-deps --no-index --find-links rebuilt wintask
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -v
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - uses: actions/upload-artifact@v6
         with:
           name: wheels-sdist
           path: dist

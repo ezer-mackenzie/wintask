@@ -3,8 +3,8 @@
 ## Requirements
 
 - Windows for actual Task Scheduler operations.
-- Python 3.9 or newer.
-- Rust and Cargo.
+- Standard CPython 3.9 through 3.14; see the [support matrix](support.md).
+- Rust 1.85+ and Cargo when building from source.
 - `uv` and `maturin`.
 
 ## Install for development

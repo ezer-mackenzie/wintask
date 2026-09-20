@@ -26,7 +26,9 @@ interpreter from the active environment.
 
 Rust owns COM initialization through RAII, connects to `Schedule.Service`, and
 exposes `register_xml`, `run_task`, `delete_task`, and `task_exists` to Python. Windows
-errors are translated into Python exceptions.
+errors are translated consistently into public exceptions with HRESULT and
+operation details. COM calls release the GIL, reuse an existing STA when needed,
+and release interfaces before balancing owned COM initialization.
 
 The `_wintask_backend` name is intentionally private. Applications should use
 the stable `wintask` Python API instead of importing the extension directly.

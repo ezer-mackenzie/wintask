@@ -4,15 +4,36 @@ build-backend = "maturin"
 
 [project]
 name = "wintask"
-requires-python = ">=3.9"
+description = "Typed Python API for Windows Task Scheduler with a native Rust COM bridge"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE.md"]
+authors = [{ name = "Eli-ezer Reuven Ramirez Ruiz" }]
+keywords = ["windows", "task-scheduler", "scheduling", "automation"]
+requires-python = ">=3.9,<3.15"
 classifiers = [
     "Programming Language :: Rust",
     "Programming Language :: Python :: Implementation :: CPython",
-    "Programming Language :: Python :: Implementation :: PyPy",
+    "Development Status :: 4 - Beta",
+    "Operating System :: Microsoft :: Windows",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Typing :: Typed",
 ]
 dynamic = ["version"]
 
+[project.urls]
+Documentation = "https://wintask.readthedocs.io/"
+Repository = "https://github.com/ezer-mackenzie/wintask"
+Issues = "https://github.com/ezer-mackenzie/wintask/issues"
+Changelog = "https://github.com/ezer-mackenzie/wintask/blob/main/CHANGELOG.md"
+
 [dependency-groups]
+release = ["twine>=6.1,<7.0"]
 docs = [
     "mkdocs>=1.6,<2.0",
 ]
@@ -20,4 +41,8 @@ docs = [
 [tool.maturin]
 module-name = "wintask._wintask_backend"
 python-source = "python"
-include = [{ path = "python/wintask/py.typed", format = "wheel" }]
+include = [
+    { path = "python/wintask/py.typed", format = "wheel" },
+    { path = "tests/*.py", format = "sdist" },
+    { path = "tools/*.py", format = "sdist" },
+]

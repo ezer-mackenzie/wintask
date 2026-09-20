@@ -1,7 +1,12 @@
 [package]
 name = "wintask"
-version = "0.9.0"
+version = "0.10.0"
 edition = "2024"
+rust-version = "1.85"
+license = "Apache-2.0"
+description = "Python API for Windows Task Scheduler with a native COM bridge"
+repository = "https://github.com/ezer-mackenzie/wintask"
+documentation = "https://wintask.readthedocs.io/"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [lib]

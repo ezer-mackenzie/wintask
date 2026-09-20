@@ -14,14 +14,16 @@ remove it from the root Task Scheduler folder.
 and `False` when it is not. Permission and other native errors still raise
 exceptions.
 
-Task names are validated before the native backend is called. Empty names,
-control characters, and backslashes raise `TaskNameError` because this release
-targets the root Task Scheduler folder.
+Task names are validated before the native backend is called. Names violating the
+[root-folder name policy](support.md#input-validation) raise `TaskNameError`.
 
 ## Errors
 
-`TaskNameError` is raised for invalid task names. Native Windows failures are
-reported as Python runtime or permission errors by the Rust extension.
+`TaskNameError` is raised for invalid task names. Native access denials raise
+`TaskPermissionError` (a `PermissionError` subclass); other native Windows
+failures raise `TaskSchedulerError` (a `RuntimeError` subclass). Both expose an
+unsigned `hresult` and an `operation` string. These classes are public exports
+from `wintask`. See [errors and threading](support.md#errors-com-and-threads).
 
 ## Trigger models
 
@@ -31,7 +33,7 @@ reported as Python runtime or permission errors by the Rust extension.
 DailyTrigger(at=time(9, 30), interval=1)
 ```
 
-`interval` must be at least `1`.
+`interval` must be an integer from `1` through `365`; booleans are rejected.
 
 ### `WeeklyTrigger`
 
@@ -54,7 +56,9 @@ MonthlyTrigger(
 )
 ```
 
-The day must be between `1` and `31`, and months must be unique.
+The day must be an integer between `1` and `31` (excluding booleans), and months
+must be unique. A day absent from a selected month does not mean its last day.
+See the [scheduling contract](support.md#scheduling-behavior).
 
 ## XML builders
 

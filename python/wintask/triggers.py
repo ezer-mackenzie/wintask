@@ -2,6 +2,8 @@ from dataclasses import dataclass
 from datetime import time
 from enum import Enum
 
+from .validation import validate_integer, validate_time
+
 
 class Weekday(str, Enum):
     """Weekday names accepted by Windows Task Scheduler XML."""
@@ -40,10 +42,8 @@ class DailyTrigger:
     interval: int = 1
 
     def __post_init__(self) -> None:
-        if self.interval < 1:
-            raise ValueError("interval must be greater than zero")
-        if self.at.tzinfo is not None:
-            raise ValueError("at must be a naive local time")
+        validate_integer(self.interval, "interval", 1, 365)
+        validate_time(self.at)
 
 
 @dataclass(frozen=True)
@@ -54,14 +54,15 @@ class WeeklyTrigger:
     days: tuple[Weekday, ...]
 
     def __post_init__(self) -> None:
+        if not isinstance(self.days, tuple):
+            raise TypeError("days must be a tuple of Weekday values")
         if not self.days:
             raise ValueError("days must contain at least one weekday")
+        if any(type(value) is not Weekday for value in self.days):
+            raise TypeError("days must contain Weekday values")
         if len(set(self.days)) != len(self.days):
             raise ValueError("days must not contain duplicates")
-        if any(type(day) is not Weekday for day in self.days):
-            raise TypeError("days must contain Weekday values")
-        if self.at.tzinfo is not None:
-            raise ValueError("at must be a naive local time")
+        validate_time(self.at)
 
 
 @dataclass(frozen=True)
@@ -73,13 +74,13 @@ class MonthlyTrigger:
     months: tuple[Month, ...]
 
     def __post_init__(self) -> None:
-        if not 1 <= self.day <= 31:
-            raise ValueError("day must be between 1 and 31")
+        validate_integer(self.day, "day", 1, 31)
+        if not isinstance(self.months, tuple):
+            raise TypeError("months must be a tuple of Month values")
         if not self.months:
             raise ValueError("months must contain at least one month")
+        if any(type(value) is not Month for value in self.months):
+            raise TypeError("months must contain Month values")
         if len(set(self.months)) != len(self.months):
             raise ValueError("months must not contain duplicates")
-        if any(type(month) is not Month for month in self.months):
-            raise TypeError("months must contain Month values")
-        if self.at.tzinfo is not None:
-            raise ValueError("at must be a naive local time")
+        validate_time(self.at)
