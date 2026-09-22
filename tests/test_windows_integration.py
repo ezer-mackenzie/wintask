@@ -104,8 +104,8 @@ class TaskExistenceIntegrationTests(unittest.TestCase):
                             raise
                         clock.sleep(0.1)
                 self.assertEqual(result['args'], list(arguments))
-                self.assertEqual(Path(result['cwd']), work)
-                self.assertEqual(Path(result['executable']), Path(sys.executable))
+                self.assertTrue(Path(result['cwd']).samefile(work), f"{result['cwd']} is not the same directory as {work}")
+                self.assertTrue(Path(result['executable']).samefile(sys.executable), f"{result['executable']} is not the same file as {sys.executable}")
             finally:
                 if registered:
                     # Stop any running instance before removing its temporary files.
