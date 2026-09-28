@@ -33,7 +33,7 @@ Issues = "https://github.com/ezer-mackenzie/wintask/issues"
 Changelog = "https://github.com/ezer-mackenzie/wintask/blob/main/CHANGELOG.md"
 
 [dependency-groups]
-release = ["twine>=6.1,<7.0"]
+release = ["twine>=6.1,<8.0"]
 docs = [
     "mkdocs>=1.6,<2.0",
 ]
